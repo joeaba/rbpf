@@ -59,7 +59,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+#         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
 #           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
           tag_name: ${{ github.ref }}
@@ -75,7 +75,7 @@ jobs:
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
         run: |
-             cargo publish 
+             cargo publish --allow-dirty
      
            
   buildwindow:
@@ -129,7 +129,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+#         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
 #           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
           tag_name: ${{ github.ref }}
@@ -144,6 +144,6 @@ jobs:
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
         run: |
-             cargo publish
+             cargo publish --allow-dirty
      
   
