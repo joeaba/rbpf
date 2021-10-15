@@ -125,6 +125,7 @@ jobs:
         run: cargo package --allow-dirty 
         
       - name: Create Release
+        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -138,12 +139,8 @@ jobs:
             Changes in this Release
             - First Change
             - Second Change
-      
-          
-      - name: cargo login
-        run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-      - name: publish
-        run: |
-             cargo publish --allow-dirty
+      - run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
+      - run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
+      - run: cargo publish --allow-dirty
      
   
