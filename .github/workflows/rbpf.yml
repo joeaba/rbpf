@@ -53,17 +53,18 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
-          if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-#           tag_name: 0.2.14
-#           release_name: solana_rbpf_0.2.14
-#           body: |
-#             Changes in this Release
-#             - First Change
-#             - Second Change
-#           draft: false
-#           prerelease: false
+#           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
           
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
@@ -114,25 +115,27 @@ jobs:
             "cargo bench -- --nocapture"
           }
       - name: before deploy
-        run: |
-            cargo doc
+        run: cargo doc
       - name: deploy     
         run: cargo package --allow-dirty
+        
+        
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
-          if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-#           tag_name: 0.2.14
-#           release_name: solana_rbpf_0.2.14
-#           body: |
-#             Changes in this Release
-#             - First Change
-#             - Second Change
-#           draft: false
-#           prerelease: false
+#           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
      
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
