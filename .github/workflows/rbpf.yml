@@ -49,6 +49,11 @@ jobs:
            if [ "$rustup default" == "nightly" ] ; then
               cargo bench -- --nocapture
            fi
+      - name: before deploy
+        run: cargo doc
+      - name: deploy     
+        run: cargo package --allow-dirty
+        
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
