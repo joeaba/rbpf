@@ -1,0 +1,139 @@
+name: Build
+on:
+  push:
+    branches:  [main]
+  pull_request:
+    branches:  [main]
+   
+   
+jobs:
+  build:
+    name : test
+    strategy:
+      fail-fast: false
+      matrix:
+       rust : [stable , beta]
+       os : [ ubuntu-latest, macos-latest,] 
+       include: 
+           - os: ubuntu-latest
+             rust: nightly
+             allow_failure: true
+           - os : macOS-latest
+             rust: nightly
+             allow_failure: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-  
+      - run : |
+            rustup update
+            rustup component add clippy-preview
+            rustup component add rustfmt
+            cargo fmt --all -- --check
+            cargo clippy --all --tests -- --deny=warnings
+            set RUSTFLAGS="-D warnings"
+            cargo build --verbose
+            cargo test --verbose
+      - name: IF statement
+        run: |
+           if [ "$rustup default" == "nightly" ] ; then
+              cargo bench -- --nocapture
+           fi
+           
+  buildwindow:
+    name : windows test
+    strategy:
+      fail-fast: false
+      matrix:
+       rust : [stable , beta]
+       os : [ windows-latest] 
+       include: 
+           - os: windows-latest
+             rust: nightly
+             allow_failure: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-  
+      - run : |
+            rustup update
+            rustup component add clippy-preview
+            rustup component add rustfmt
+            cargo fmt --all -- --check
+            cargo clippy --all --tests -- --deny=warnings
+            set RUSTFLAGS="-D warnings"
+            cargo build --verbose
+            cargo test --verbose
+      - name: IF statement
+        run: |
+          if ( $rustup  -eq "nightly" )
+          {
+            "cargo bench -- --nocapture"
+          }
+      - name: before deploy
+        run: |
+            cargo doc
+      - name: deploy     
+        run: cargo package --allow-dirty
+  release:
+    name: Release
+    needs: [ build,buildwindow ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          api_key : ${{ secrets.GITHUB_TOKEN }}
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.26.0
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           WITH_V: true
+           DEFAULT_BUMP: patch
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+#           tag_name: 0.2.14
+#           release_name: solana_rbpf 
+#           body: |
+#             Changes in this Release
+#             - First Change
+#             - Second Change
+#           draft: false
+#           prerelease: false
+     
+      - name: cargo login
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
+      - name: publish
+        run: |
+             cargo publish 
