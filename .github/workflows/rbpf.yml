@@ -33,8 +33,9 @@ jobs:
             ~/.cargo/registry/cache/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-  
-      - run : |
+          restore-keys: ${{ runner.os }}-cargo- 
+      - name : cmd
+        run : |
             rustup update
             rustup component add clippy-preview
             rustup component add rustfmt
@@ -67,6 +68,8 @@ jobs:
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
+        run: |
+             cargo publish 
      
            
   buildwindow:
@@ -92,8 +95,10 @@ jobs:
             ~/.cargo/registry/cache/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-  
-      - run : |
+          restore-keys: ${{ runner.os }}-cargo-
+          
+      - name : cmd
+        run : |
             rustup update
             rustup component add clippy-preview
             rustup component add rustfmt
@@ -132,7 +137,8 @@ jobs:
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
-     
+        run: |
+             cargo publish   
 #   release:
 #     name: Release
 #     needs: [ build,buildwindow ]
