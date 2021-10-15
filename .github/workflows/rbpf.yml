@@ -146,7 +146,7 @@ jobs:
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
         run: |
-             cargo publish   
+             cargo publish --allow-dirty 
 #   release:
 #     name: Release
 #     needs: [ build,buildwindow ]
@@ -175,6 +175,6 @@ jobs:
 #         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
 #       - name: publish
 #         run: |
-#              cargo publish 
+#              cargo publish --allow-dirty
 
 
