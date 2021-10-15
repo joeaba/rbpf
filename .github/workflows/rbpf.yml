@@ -68,8 +68,8 @@ jobs:
             Changes in this Release
             - First Change
             - Second Change
-          draft: false
-          prerelease: false
+#           draft: false
+#           prerelease: false
           
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
@@ -122,14 +122,13 @@ jobs:
       - name: before deploy
         run: cargo doc
       - name: deploy     
-        run: cargo package --allow-dirty
-        
+        run: cargo package --allow-dirty 
         
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
 #           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
@@ -139,42 +138,12 @@ jobs:
             Changes in this Release
             - First Change
             - Second Change
-          draft: false
-          prerelease: false
-     
+      
+          
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
       - name: publish
         run: |
-             cargo publish --allow-dirty 
-#   release:
-#     name: Release
-#     needs: [ build,buildwindow ]
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v2
-#       - uses: actions/cache@v2
-#         with:
-#           api_key : ${{ secrets.GITHUB_TOKEN }}
-#           path: |
-#             ~/.cargo/bin/
-#             ~/.cargo/registry/index/
-#             ~/.cargo/registry/cache/
-#             target/
-#           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-#           restore-keys: ${{ runner.os }}-cargo-
-#       - name: Bump version and push tag
-#         uses: anothrNick/github-tag-action@1.26.0
-#         env:
-#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#            WITH_V: true
-#            DEFAULT_BUMP: patch
+             cargo publish
      
-#       - name: cargo login
-#         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-#       - name: publish
-#         run: |
-#              cargo publish --allow-dirty
-
-
+  
