@@ -62,8 +62,8 @@ jobs:
 #         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         with:
 #           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: 0.2.14
+          release_name: solana_rbpf_0.2.14
           body: |
             Changes in this Release
             - First Change
@@ -139,8 +139,10 @@ jobs:
             Changes in this Release
             - First Change
             - Second Change
-      - run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-      - run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-      - run: cargo publish --allow-dirty
+      - name: cargo login
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
+      - name: publish
+        run: |
+             cargo publish --allow-dirty
      
   
