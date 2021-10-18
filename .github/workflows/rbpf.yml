@@ -44,13 +44,14 @@ jobs:
             export RUSTFLAGS="-D warnings"
             cargo build --verbose
             cargo test --verbose
-      - name: IF statement
-        run: |
-           if [ "$rustup default" == "nightly" ] ; then
-              cargo bench -- --nocapture
-           fi
+     
       - name: before deploy
         run: cargo doc
+      - name: if conditions
+        if: ${{ matrix.rust == 'nightly' }}
+        run : |
+            rustup override set nightly
+            cargo bench -- --nocapture
       - name: deploy     
         run: cargo package --allow-dirty
         
@@ -113,14 +114,13 @@ jobs:
             set RUSTFLAGS="-D warnings"
             cargo build --verbose
             cargo test --verbose
-      - name: IF statement
-        run: |
-          if ( $rustup  -eq "nightly" )
-          {
-            "cargo bench -- --nocapture"
-          }
       - name: before deploy
         run: cargo doc
+      - name: if conditions
+        if: ${{ matrix.rust == 'nightly' }}
+        run : |
+            rustup override set nightly
+            cargo bench -- --nocapture
       - name: deploy     
         run: cargo package --allow-dirty 
         
