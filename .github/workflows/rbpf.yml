@@ -1,4 +1,4 @@
-# name: Build
+
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
 #   release:
 #    types:
 #       - created
-# jobs:
+jobs:
   build:
     name : test
     strategy:
