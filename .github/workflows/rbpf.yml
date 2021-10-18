@@ -5,11 +5,17 @@ on:
     branches:  [main]
     tags:
       - 'v*'
+  release:
+    types:
+      - created
   pull_request:
     branches:  [main]
     tags:
       - 'v*' 
-jobs:
+#   release:
+#    types:
+#       - created
+# jobs:
   build:
     name : test
     strategy:
