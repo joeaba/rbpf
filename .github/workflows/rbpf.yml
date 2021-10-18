@@ -1,24 +1,26 @@
 name: Build
+
 on:
   push:
     branches:  [main]
   pull_request:
     branches:  [main]
-   
-   
 jobs:
   build:
     name : test
     strategy:
       fail-fast: false
       matrix:
-       rust : [stable , beta]
-       os : [ ubuntu-latest, macos-latest,] 
+       rust : [stable , beta , nightly]
+       os : [ ubuntu-latest, macos-latest, windows-latest] 
        include: 
            - os: ubuntu-latest
              rust: nightly
              allow_failure: true
            - os : macOS-latest
+             rust: nightly
+             allow_failure: true
+           - os : windows-latest
              rust: nightly
              allow_failure: true
     runs-on: ${{ matrix.os }}
@@ -33,66 +35,32 @@ jobs:
             ~/.cargo/registry/cache/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo- 
-      - name : cmd
-        run : |
+          restore-keys: ${{ runner.os }}-cargo-  
+      - run : |
             rustup update
             rustup component add clippy-preview
             rustup component add rustfmt
             cargo fmt --all -- --check
             cargo clippy --all --tests -- --deny=warnings
-            export RUSTFLAGS="-D warnings"
+            set RUSTFLAGS="-D warnings"
             cargo build --verbose
             cargo test --verbose
-     
-      - name: before deploy
-        run: cargo doc
       - name: if conditions
         if: ${{ matrix.rust == 'nightly' }}
         run : |
             rustup override set nightly
             cargo bench -- --nocapture
       - name: deploy     
-        run: cargo package --allow-dirty
-        
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-        with:
-#           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-          tag_name: 0.2.16
-          release_name: solana_rbpf_0.2.16
-          body: |
-            Changes in this Release
-            - First Change
-            - Second Change
-#           draft: false
-#           prerelease: false
-          
-      - name: cargo login
-        run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-      - name: publish
         run: |
-             cargo publish --allow-dirty
-     
-           
-  buildwindow:
-    name : windows test
-    strategy:
-      fail-fast: false
-      matrix:
-       rust : [stable , beta]
-       os : [ windows-latest] 
-       include: 
-           - os: windows-latest
-             rust: nightly
-             allow_failure: true
-    runs-on: ${{ matrix.os }}
+           cargo doc
+           cargo package --allow-dirty 
+  release:
+    name: Release
+    if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+    needs: build
+    runs-on: ubuntu-latest
     steps:
-      - name: Setup | Checkout
+      - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
@@ -103,46 +71,21 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
-          
-      - name : cmd
-        run : |
-            rustup update
-            rustup component add clippy-preview
-            rustup component add rustfmt
-            cargo fmt --all -- --check
-            cargo clippy --all --tests -- --deny=warnings
-            set RUSTFLAGS="-D warnings"
-            cargo build --verbose
-            cargo test --verbose
-      - name: before deploy
-        run: cargo doc
-      - name: if conditions
-        if: ${{ matrix.rust == 'nightly' }}
-        run : |
-            rustup override set nightly
-            cargo bench -- --nocapture
-      - name: deploy     
-        run: cargo package --allow-dirty 
-        
       - name: Create Release
-        if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         with:
-#           if : ${{ startsWith(github.ref, 'refs/tags/v*' && github.ref == 'refs/heads/main') }}
-          tag_name: 0.2.16
-          release_name: solana_rbpf_0.2.16
+          tag_name: 0.2.17
+          release_name: solana_rbpf_0.2.17
           body: |
             Changes in this Release
             - First Change
             - Second Change
+          draft: false
+          prerelease: false
       - name: cargo login
         run: cargo login ${{ secrets.CRATES_IO_TOKEN}}
-      - name: publish
-        run: |
-             cargo publish --allow-dirty
-     
-  
+      - run: | 
+          cargo publish --allow-dirty
